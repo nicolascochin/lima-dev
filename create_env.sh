@@ -117,6 +117,9 @@ EOF
   yq eval -i ".provision += [{\"mode\": \"user\", \"script\": \"$(echo "$script" | sed 's/"/\\"/g' | awk '{print $0 "\\n"}' | tr -d '\n')\"}]" "$TEMPLATE_FILE"
 fi
 
+cat $TEMPLATE_FILE
+exit
+
 echo "File used to setup the VM is here: $TEMPLATE_FILE"
 # Install the VM
 limactl create --tty=false --name="$NAME" $TEMPLATE_FILE
