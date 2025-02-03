@@ -49,11 +49,9 @@ fi
 
 while [[ -z "${GITHUB_USER}" ]]; do
   read -p "Entrez votre nom d'utilisateur GitHub : " GITHUB_USER
-  export GITHUB_USER
 done
 while [[ -z "${GITHUB_EMAIL}" ]]; do
   read -p "Entrez votre email GitHub : " GITHUB_EMAIL
-  export GITHUB_EMAIL
 done
 export 
 
@@ -86,7 +84,7 @@ ln -s ~/.ssh_host/id* ~/.ssh/
 sudo chsh -s $(which zsh) $(whoami)
 # Fetch config
 git clone -c core.sshCommand="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" git@github.com:nicolascochin/shell_config.git ~/.config/shell_config
-~/.config/shell_config/install.sh
+GITHUB_EMAIL="$GITHUB_EMAIL" GITHUB_NAME="$GITHUB_NAME" ~/.config/shell_config/install.sh
 EOF
 )
 yq eval -i ".provision += [{\"mode\": \"user\", \"script\": \"$(echo "$script" | sed 's/"/\\"/g' | awk '{print $0 "\\n"}' | tr -d '\n')\"}]" "$TEMPLATE_FILE"
