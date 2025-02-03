@@ -9,5 +9,5 @@ bash <(curl -Ls https://raw.githubusercontent.com/nicolascochin/lima-dev/refs/he
 
 ### Enter into the vm (and start it if needed)
 ```shell
-bash <(curl -Ls https://raw.githubusercontent.com/nicolascochin/lima-dev/refs/heads/main/create_env.sh) NAME_OF_VM 
+bash <(curl -Ls https://raw.githubusercontent.com/nicolascochin/lima-dev/refs/heads/main/enter_env.sh) NAME_OF_VM 
 ```
