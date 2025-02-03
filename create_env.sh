@@ -47,6 +47,13 @@ if ! command -v limactl &> /dev/null; then
     exit 1
 fi
 
+while [[ -z "${GITHUB_USER}" ]]; do
+  read -p "Entrez votre nom d'utilisateur GitHub : " GITHUB_USER
+done
+while [[ -z "${GITHUB_EMAIL}" ]]; do
+  read -p "Entrez votre email GitHub : " GITHUB_EMAIL
+done
+
 # Temporary directory to store the intermediate templates
 TEMP_DIR=$(mktemp -d)
 TEMPLATE_FILE=$TEMP_DIR/template.yaml
@@ -76,14 +83,6 @@ ln -s ~/.ssh_host/id* ~/.ssh/
 sudo chsh -s $(which zsh) $(whoami)
 # Fetch config
 git clone -c core.sshCommand="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" git@github.com:nicolascochin/shell_config.git ~/.config/shell_config
-
-while [[ -z "${GITHUB_USER}" ]]; do
-  read -p "Entrez votre nom d'utilisateur GitHub : " GITHUB_USER
-done
-while [[ -z "${GITHUB_EMAIL}" ]]; do
-  read -p "Entrez votre email GitHub : " GITHUB_EMAIL
-done
-
 GITHUB_EMAIL="$GITHUB_EMAIL" GITHUB_USER="$GITHUB_USER" ~/.config/shell_config/install.sh
 EOF
 )
