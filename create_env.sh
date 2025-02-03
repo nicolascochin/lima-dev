@@ -74,11 +74,6 @@ ln -s ~/.ssh_host/config ~/.ssh/config
 ln -s ~/.ssh_host/id* ~/.ssh/
 # Change the shell
 sudo chsh -s $(which zsh) $(whoami)
-# Install OMZ
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-# Install OMZ plugins & theme
-git clone https://github.com/mattmc3/zshrc.d $HOME/.oh-my-zsh/custom/plugins/zshrc.d
-git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $HOME/.oh-my-zsh/custom/themes/powerlevel10k
 # Fetch config
 git clone -c core.sshCommand="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" git@github.com:nicolascochin/shell_config.git ~/.config/shell_config
 ~/.config/shell_config/install.sh
