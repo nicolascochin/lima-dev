@@ -73,7 +73,7 @@ yq eval -i ".provision += [{\"mode\": \"system\", \"script\": \"ln -s /usr/bin/b
 yq eval -i ".provision += [{\"mode\": \"system\", \"script\": \"hostnamectl set-hostname $NAME\"}]" "$TEMPLATE_FILE"
 
 # Finish installation
-script=$(cat <<'EOF'
+script=$(cat <<EOF
 #!/bin/bash
 set -eux -o pipefail
 # Setup SSH
@@ -102,7 +102,7 @@ if [ "$CUSTOMIZATION" == "ruby" ]; then
   echo "Install Ruby packages"
   yq eval -i ".provision += [{\"mode\": \"system\", \"script\": \"apt update && apt install -y $RUBY_PACKAGES_STRING\"}]" "$TEMPLATE_FILE"
 
-script=$(cat <<'EOF'
+script=$(cat <<EOF
 #!/bin/bash
 set -eux -o pipefail
 # Install rbenv
@@ -116,9 +116,6 @@ EOF
 )
   yq eval -i ".provision += [{\"mode\": \"user\", \"script\": \"$(echo "$script" | sed 's/"/\\"/g' | awk '{print $0 "\\n"}' | tr -d '\n')\"}]" "$TEMPLATE_FILE"
 fi
-
-cat $TEMPLATE_FILE
-exit
 
 echo "File used to setup the VM is here: $TEMPLATE_FILE"
 # Install the VM
