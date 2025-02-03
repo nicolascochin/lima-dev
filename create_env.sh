@@ -89,18 +89,26 @@ EOF
 yq eval -i ".provision += [{\"mode\": \"user\", \"script\": \"$(echo "$script" | sed 's/"/\\"/g' | awk '{print $0 "\\n"}' | tr -d '\n')\"}]" "$TEMPLATE_FILE"
 
 # Apply optional customization
-if [ "$CUSTOMIZATION" == "ruby" ]; then
-  RUBY_PACKAGES=(
-    libz-dev # rbenv
-    libpq-dev # ruby
-    libffi-dev # ruby 3
-    libyaml-dev # ruby 3
-  )
+# Save the original IFS
+OLD_IFS=$IFS
+# Set IFS to split on ',' and '|'
+IFS=',|' read -ra CUSTOMIZATION_ARRAY <<< "$CUSTOMIZATION"
+# Restore the original IFS
+IFS=$OLD_IFS
+# Print the array elements
+for item in "${CUSTOMIZATION_ARRAY[@]}"; do
+  if [ "$item" == "ruby" ]; then
+    RUBY_PACKAGES=(
+      libz-dev # rbenv
+      libpq-dev # ruby
+      libffi-dev # ruby 3
+      libyaml-dev # ruby 3
+    )
 
-  RUBY_PACKAGES_STRING=$(printf "%s " "${RUBY_PACKAGES[@]}")
+    RUBY_PACKAGES_STRING=$(printf "%s " "${RUBY_PACKAGES[@]}")
 
-  echo "Install Ruby packages"
-  yq eval -i ".provision += [{\"mode\": \"system\", \"script\": \"apt update && apt install -y $RUBY_PACKAGES_STRING\"}]" "$TEMPLATE_FILE"
+    echo "Install Ruby packages"
+    yq eval -i ".provision += [{\"mode\": \"system\", \"script\": \"apt update && apt install -y $RUBY_PACKAGES_STRING\"}]" "$TEMPLATE_FILE"
 
 script=$(cat <<EOF
 #!/bin/bash
@@ -114,8 +122,24 @@ echo "OMZ_PLUGINS+=(ruby)" >> ~/.omz_plugins.zsh
 echo "OMZ_PLUGINS+=(rails)" >> ~/.omz_plugins.zsh
 EOF
 )
-  yq eval -i ".provision += [{\"mode\": \"user\", \"script\": \"$(echo "$script" | sed 's/"/\\"/g' | awk '{print $0 "\\n"}' | tr -d '\n')\"}]" "$TEMPLATE_FILE"
-fi
+    yq eval -i ".provision += [{\"mode\": \"user\", \"script\": \"$(echo "$script" | sed 's/"/\\"/g' | awk '{print $0 "\\n"}' | tr -d '\n')\"}]" "$TEMPLATE_FILE"
+  fi
+
+  if [ "$item" == "js" ]; then  
+script=$(cat <<EOF
+#!/bin/bash
+set -eux -o pipefail
+# Install nodenv
+curl -fsSL https://github.com/nodenv/nodenv-installer/raw/HEAD/bin/nodenv-installer | bash
+echo "OMZ_PLUGINS+=(nodenv)" >> ~/.omz_plugins.zsh
+EOF
+)
+    yq eval -i ".provision += [{\"mode\": \"user\", \"script\": \"$(echo "$script" | sed 's/"/\\"/g' | awk '{print $0 "\\n"}' | tr -d '\n')\"}]" "$TEMPLATE_FILE"
+  fi
+  fi
+done
+
+
 
 echo "File used to setup the VM is here: $TEMPLATE_FILE"
 # Install the VM
