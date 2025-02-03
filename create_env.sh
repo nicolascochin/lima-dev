@@ -12,7 +12,7 @@ PACKAGES=(
   direnv
   zsh
   bat
-  fzf
+#  fzf
   jq
   git
   curl
