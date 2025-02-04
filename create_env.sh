@@ -137,30 +137,30 @@ for component in "${COMPONENTS[@]}"; do
     echo "Install Ruby packages"
     yq eval -i ".provision += [{\"mode\": \"system\", \"script\": \"apt update && apt install -y $RUBY_PACKAGES_STRING\"}]" "$TEMPLATE_FILE"
 
-script=$(cat <<EOF
-#!/bin/bash
-set -eux -o pipefail
-# Install rbenv
-curl -fsSL https://github.com/rbenv/rbenv-installer/raw/main/bin/rbenv-installer | bash
-echo "OMZ_PLUGINS+=(rbenv)" >> ~/.omz_plugins.zsh
-# Add OMZ plugins
-echo "OMZ_PLUGINS+=(bundler)" >> ~/.omz_plugins.zsh
-echo "OMZ_PLUGINS+=(ruby)" >> ~/.omz_plugins.zsh
-echo "OMZ_PLUGINS+=(rails)" >> ~/.omz_plugins.zsh
-EOF
-)
+    script=$(cat <<-EOF
+    #!/bin/bash
+    set -eux -o pipefail
+    # Install rbenv
+    curl -fsSL https://github.com/rbenv/rbenv-installer/raw/main/bin/rbenv-installer | bash
+    echo "OMZ_PLUGINS+=(rbenv)" >> ~/.omz_plugins.zsh
+    # Add OMZ plugins
+    echo "OMZ_PLUGINS+=(bundler)" >> ~/.omz_plugins.zsh
+    echo "OMZ_PLUGINS+=(ruby)" >> ~/.omz_plugins.zsh
+    echo "OMZ_PLUGINS+=(rails)" >> ~/.omz_plugins.zsh
+    EOF
+    )
     yq eval -i ".provision += [{\"mode\": \"user\", \"script\": \"$(echo "$script" | sed 's/"/\\"/g' | awk '{print $0 "\\n"}' | tr -d '\n')\"}]" "$TEMPLATE_FILE"
   fi
 
   if [ "$component" == "js" ]; then  
-script=$(cat <<EOF
-#!/bin/bash
-set -eux -o pipefail
-# Install nodenv
-curl -fsSL https://github.com/nodenv/nodenv-installer/raw/HEAD/bin/nodenv-installer | bash
-echo "OMZ_PLUGINS+=(nodenv)" >> ~/.omz_plugins.zsh
-EOF
-)
+  script=$(cat <<-EOF
+  #!/bin/bash
+  set -eux -o pipefail
+  # Install nodenv
+  curl -fsSL https://github.com/nodenv/nodenv-installer/raw/HEAD/bin/nodenv-installer | bash
+  echo "OMZ_PLUGINS+=(nodenv)" >> ~/.omz_plugins.zsh
+  EOF
+  )
     yq eval -i ".provision += [{\"mode\": \"user\", \"script\": \"$(echo "$script" | sed 's/"/\\"/g' | awk '{print $0 "\\n"}' | tr -d '\n')\"}]" "$TEMPLATE_FILE"
   fi
 done
