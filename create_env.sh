@@ -161,7 +161,7 @@ for component in "${COMPONENTS[@]}"; do
     echo "OMZ_PLUGINS+=(nodenv)" >> ~/.omz_plugins.zsh
     EOF
     )
-    yq eval -i ".provision += [{\"mode\": \"user\", \"script\": \"$(echo "$script" | sed 's/"/\\"/g' | awk '{print $0 "\\n"}' | tr -d '\n')\"}]" "$TEMPLATE_FILE"
+    yq eval -i ".provision += [{\"mode\": \"user\", \"script\": \"$(echo "$script" | sed 's/"/\\"/g' | | sed ':a;N;$!ba;s/\n/\\n/g' | awk '{print $0 "\\n"}' | tr -d '\n')\"}]" "$TEMPLATE_FILE"
   fi
 done
 
