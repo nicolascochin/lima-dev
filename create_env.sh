@@ -165,9 +165,6 @@ for component in "${COMPONENTS[@]}"; do
   fi
 done
 
-cat $TEMPLATE_FILE
-exit
-
 echo "File used to setup the VM is here: $TEMPLATE_FILE"
 # Install the VM
 limactl create --tty=false --name="$NAME" $TEMPLATE_FILE
