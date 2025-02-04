@@ -1,12 +1,12 @@
 #!/bin/bash
 
 NAME=$1
-CUSTOMIZATION=$2
-
 GUEST_HOME=/home/$NAME
 ME=$(whoami)
 LIMA_TEMPLATE=${LIMA_TEMPLATE:-docker}
 TEMPLATE_DOCKER=https://raw.githubusercontent.com/lima-vm/lima/refs/heads/master/templates/${LIMA_TEMPLATE}.yaml
+COMPONENTS=()
+PORTS=()
 
 PACKAGES=(
   command-not-found
@@ -48,6 +48,34 @@ if ! command -v limactl &> /dev/null; then
     exit 1
 fi
 
+# Parcourir les arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -c)
+      if [[ -n "$2" && "$2" != -* ]]; then
+        COMPONENTS+=("$2")
+        shift 2
+      else
+        echo "Erreur : l'option -c nécessite un argument." >&2
+        exit 1
+      fi
+      ;;
+    -p)
+      if [[ -n "$2" && "$2" != -* ]]; then
+        PORTS+=("$2")
+        shift 2
+      else
+        echo "Erreur : l'option -p nécessite un argument." >&2
+        exit 1
+      fi
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+
 while [[ -z "${GITHUB_USER}" ]]; do
   read -p "Entrez votre nom d'utilisateur GitHub : " GITHUB_USER
 done
@@ -69,6 +97,11 @@ yq eval -i ".mounts += [{\"location\": \"~/Workspaces\", \"writable\": true, \"m
 # Add a provision step to install packages
 yq eval -i ".provision += [{\"mode\": \"system\", \"script\": \"apt update && apt install -y $PACKAGES_STRING\"}]" "$TEMPLATE_FILE"
 yq eval -i ".provision += [{\"mode\": \"system\", \"script\": \"ln -s /usr/bin/batcat /usr/bin/bat\"}]" "$TEMPLATE_FILE"
+for port in "${PORTS[@]}"; do
+  host_port=$(echo "$port" | cut -d':' -f1)
+  guest_port=$(echo "$port" | cut -d':' -f2)
+  yq eval -i ".portForwards += [{\"guestPort\": $guest_port, \"hostPort\": $host_port}]" "$TEMPLATE_FILE"
+done
 
 # setup hostname
 yq eval -i ".provision += [{\"mode\": \"system\", \"script\": \"hostnamectl set-hostname $NAME\"}]" "$TEMPLATE_FILE"
@@ -90,15 +123,8 @@ EOF
 yq eval -i ".provision += [{\"mode\": \"user\", \"script\": \"$(echo "$script" | sed 's/"/\\"/g' | awk '{print $0 "\\n"}' | tr -d '\n')\"}]" "$TEMPLATE_FILE"
 
 # Apply optional customization
-# Save the original IFS
-OLD_IFS=$IFS
-# Set IFS to split on ',' and '|'
-IFS=',|' read -ra CUSTOMIZATION_ARRAY <<< "$CUSTOMIZATION"
-# Restore the original IFS
-IFS=$OLD_IFS
-# Print the array elements
-for item in "${CUSTOMIZATION_ARRAY[@]}"; do
-  if [ "$item" == "ruby" ]; then
+for component in "${COMPONENTS[@]}"; do
+  if [ "$component" == "ruby" ]; then
     RUBY_PACKAGES=(
       libz-dev # rbenv
       libpq-dev # ruby
@@ -126,7 +152,7 @@ EOF
     yq eval -i ".provision += [{\"mode\": \"user\", \"script\": \"$(echo "$script" | sed 's/"/\\"/g' | awk '{print $0 "\\n"}' | tr -d '\n')\"}]" "$TEMPLATE_FILE"
   fi
 
-  if [ "$item" == "js" ]; then  
+  if [ "$component" == "js" ]; then  
 script=$(cat <<EOF
 #!/bin/bash
 set -eux -o pipefail
@@ -139,7 +165,8 @@ EOF
   fi
 done
 
-
+cat $TEMPLATE_FILE
+exit
 
 echo "File used to setup the VM is here: $TEMPLATE_FILE"
 # Install the VM
