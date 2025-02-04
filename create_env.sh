@@ -137,7 +137,7 @@ for component in "${COMPONENTS[@]}"; do
     echo "Install Ruby packages"
     yq eval -i ".provision += [{\"mode\": \"system\", \"script\": \"apt update && apt install -y $RUBY_PACKAGES_STRING\"}]" "$TEMPLATE_FILE"
 
-    script=$(cat <<-EOF
+    script=$(cat <<EOF | sed 's/^    //'
     #!/bin/bash
     set -eux -o pipefail
     # Install rbenv
@@ -153,7 +153,7 @@ for component in "${COMPONENTS[@]}"; do
   fi
 
   if [ "$component" == "js" ]; then  
-    script=$(cat <<-EOF
+    script=$(cat <<EOF | sed 's/^    //'
     #!/bin/bash
     set -eux -o pipefail
     # Install nodenv
