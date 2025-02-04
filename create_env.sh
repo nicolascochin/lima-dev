@@ -153,14 +153,14 @@ for component in "${COMPONENTS[@]}"; do
   fi
 
   if [ "$component" == "js" ]; then  
-  script=$(cat <<-EOF
-  #!/bin/bash
-  set -eux -o pipefail
-  # Install nodenv
-  curl -fsSL https://github.com/nodenv/nodenv-installer/raw/HEAD/bin/nodenv-installer | bash
-  echo "OMZ_PLUGINS+=(nodenv)" >> ~/.omz_plugins.zsh
-  EOF
-  )
+    script=$(cat <<-EOF
+    #!/bin/bash
+    set -eux -o pipefail
+    # Install nodenv
+    curl -fsSL https://github.com/nodenv/nodenv-installer/raw/HEAD/bin/nodenv-installer | bash
+    echo "OMZ_PLUGINS+=(nodenv)" >> ~/.omz_plugins.zsh
+    EOF
+    )
     yq eval -i ".provision += [{\"mode\": \"user\", \"script\": \"$(echo "$script" | sed 's/"/\\"/g' | awk '{print $0 "\\n"}' | tr -d '\n')\"}]" "$TEMPLATE_FILE"
   fi
 done
