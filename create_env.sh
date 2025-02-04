@@ -5,7 +5,8 @@ CUSTOMIZATION=$2
 
 GUEST_HOME=/home/$NAME
 ME=$(whoami)
-TEMPLATE_DOCKER=https://raw.githubusercontent.com/lima-vm/lima/refs/heads/master/templates/docker.yaml
+LIMA_TEMPLATE=${LIMA_TEMPLATE:-docker}
+TEMPLATE_DOCKER=https://raw.githubusercontent.com/lima-vm/lima/refs/heads/master/templates/${LIMA_TEMPLATE}.yaml
 
 PACKAGES=(
   command-not-found
